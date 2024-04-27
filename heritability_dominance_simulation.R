@@ -6,21 +6,24 @@ num_simulations <- 100
 num_groups <- 30
 
 number_loci <- 6
-min_num_hetero <- 3
+min_num_hetero <- 3 # Minimum number of loci that are heterozygotic
 possible_num_homo <- 0:(number_loci-min_num_hetero)
 
 number_of_dom <- 6 # Number of dominant loci
-number_of_add <- number_loci - number_of_dom
+number_of_add <- number_loci - number_of_dom # Number of additive loci
 add_vec <- rep("ADD",number_of_add)
 dom_vec <- rep("DOM",number_of_dom)
 all_effect <- c(add_vec,dom_vec)
 all_effect <- sample(all_effect,size=number_loci,replace = FALSE)
 effect_A1 <- +1 # Value +1
-effect_A2 <- 0 # Value -1
-mid_effect <- mean(c(effect_A1,effect_A2)) # Value 0
+effect_A2 <- 0 # Value 0
+mid_effect <- mean(c(effect_A1,effect_A2)) # Midpoint value
 
 effect_a1 <- effect_A1-mid_effect # Value +a
+print(effect_a1)
 effect_a2 <- effect_A2-mid_effect # Value -a
+print(effect_a2)
+
 # Additive d=0, complete dominance d=a1, partial dominance mid<d<a1,
 # Overdominance d>a1, underdominance. d<a1
 effect_d <- 0.5
@@ -32,7 +35,7 @@ epistasis <- FALSE # Turn to activate epistasis
 epistasis_level <- 6 # If N loci have at least 1 A1
 epistasis_value <- +10 # add X to the genotypic value
 baseline <- 10
-minimum_pheno_value <- baseline+env_effect*min(env_range)
+minimum_pheno_value <- baseline+env_effect*min(env_range)+2*number_loci*min(c(effect_A1,effect_A2))
 
 slope_vec <- c()
 intercept_vec <- c()
