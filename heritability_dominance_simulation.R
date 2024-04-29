@@ -1,40 +1,51 @@
 library(tidyverse)
 library(broom)
 library(patchwork)
+library(gridExtra)
+
 
 num_simulations <- 100
 num_groups <- 30
 
 number_loci <- 6
 min_num_hetero <- 3 # Minimum number of loci that are heterozygotic
-possible_num_homo <- 0:(number_loci-min_num_hetero)
 
-number_of_dom <- 6 # Number of dominant loci
-number_of_add <- number_loci - number_of_dom # Number of additive loci
-add_vec <- rep("ADD",number_of_add)
-dom_vec <- rep("DOM",number_of_dom)
-all_effect <- c(add_vec,dom_vec)
-all_effect <- sample(all_effect,size=number_loci,replace = FALSE)
+number_of_dom <- 0 # Number of dominant loci
 effect_A1 <- +1 # Value +1
 effect_A2 <- 0 # Value 0
-mid_effect <- mean(c(effect_A1,effect_A2)) # Midpoint value
-
-effect_a1 <- effect_A1-mid_effect # Value +a
-print(effect_a1)
-effect_a2 <- effect_A2-mid_effect # Value -a
-print(effect_a2)
 
 # Additive d=0, complete dominance d=a1, partial dominance mid<d<a1,
 # Overdominance d>a1, underdominance. d<a1
 effect_d <- 0.5
 
-#env_range <- round(rnorm(n = 1000,mean=0,sd=1),2) # Normal distribution
-env_range <- c(-3:-1,1,3) # Uniform distribution, with expected value 0
+env_type <- "Uniform"
+env_sd <- 2
 env_effect <- 1 # Multiplier of the env_effect
-epistasis <- FALSE # Turn to activate epistasis
+epistasis <- TRUE # Turn to TRUE, to activate epistasis
 epistasis_level <- 6 # If N loci have at least 1 A1
 epistasis_value <- +10 # add X to the genotypic value
 baseline <- 10
+
+
+# Uniform distribution, with expected value 0
+#env_range <-  # Normal distribution
+
+if (env_type=="Uniform"){
+  env_range <- c(-3:-1,1,3)
+} else if (env_type=="Normal"){
+  env_range <- round(rnorm(n = 1000,mean=0,sd=env_sd),2)
+} else{print("error")}
+
+
+possible_num_homo <- 0:(number_loci-min_num_hetero)
+number_of_add <- number_loci - number_of_dom # Number of additive loci
+add_vec <- rep("ADD",number_of_add)
+dom_vec <- rep("DOM",number_of_dom)
+all_effect <- c(add_vec,dom_vec)
+all_effect <- sample(all_effect,size=number_loci,replace = FALSE)
+mid_effect <- mean(c(effect_A1,effect_A2)) # Midpoint value
+effect_a1 <- effect_A1-mid_effect # Value +a
+effect_a2 <- effect_A2-mid_effect # Value -a
 minimum_pheno_value <- baseline+env_effect*min(env_range)+2*number_loci*min(c(effect_A1,effect_A2))
 
 slope_vec <- c()
@@ -383,11 +394,10 @@ empty <- ggplot()+geom_point(aes(1,1), colour="white")+
         axis.text.x=element_blank(), axis.text.y=element_blank(),           
         axis.title.x=element_blank(), axis.title.y=element_blank())
 
-library(gridExtra)
 p2 <- grid.arrange(scatter, 
              hist_right,
              hist_bottom, 
              empty,
              ncol=2, nrow=2, widths=c(4, 1), heights=c(4, 1))
 
-p1
+
