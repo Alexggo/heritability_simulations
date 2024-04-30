@@ -129,22 +129,22 @@ get_phenotype <- function(geno,baseline=baseline,
   effect_val <- c()
   for (e in seq_along(all_effect)){ # For every loci
     if (all_effect[e]=="DOM"){ # If the locus is dominant:
-      effect_val[e] <- ifelse(par1[1,e]=="A1"&par2[2,e]=="A1",
+      effect_val[e] <- ifelse(geno[1,e]=="A1"&geno[2,e]=="A1",
                               2*(mid_effect+effect_a1),
-                                  ifelse(par1[1,e]=="A1"&par2[2,e]=="A2"|
-                                           par1[1,e]=="A2"&par2[2,e]=="A1",
+                                  ifelse(geno[1,e]=="A1"&geno[2,e]=="A2"|
+                                           geno[1,e]=="A2"&geno[2,e]=="A1",
                                          mid_effect+effect_d+mid_effect+effect_d,
-                                         ifelse(par1[1,e]=="A2"&par2[2,e]=="A2",
+                                         ifelse(geno[1,e]=="A2"&geno[2,e]=="A2",
                                                 2*(mid_effect+effect_a2))))
       
       
     } else if(all_effect[e]=="ADD"){ # If the locus is additive:
-      effect_val[e] <- ifelse(par1[1,e]=="A1"&par2[2,e]=="A1",
+      effect_val[e] <- ifelse(geno[1,e]=="A1"&geno[2,e]=="A1",
                               2*(mid_effect+effect_a1),
-                              ifelse(par1[1,e]=="A1"&par2[2,e]=="A2"|
-                                       par1[1,e]=="A2"&par2[2,e]=="A1",
+                              ifelse(geno[1,e]=="A1"&geno[2,e]=="A2"|
+                                       geno[1,e]=="A2"&geno[2,e]=="A1",
                                      mid_effect+effect_a1+mid_effect+effect_a2,
-                                     ifelse(par1[1,e]=="A2"&par2[2,e]=="A2",
+                                     ifelse(geno[1,e]=="A2"&geno[2,e]=="A2",
                                             2*(mid_effect+effect_a2))))
     }  
       else{print("error")}
