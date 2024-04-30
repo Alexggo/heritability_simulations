@@ -1,90 +1,7 @@
 using DataFrames
 using Random
+using Statistics
 
-# Function to sample genotypes
-function sample_genotype(num_loci)
-possible_num_homo = 0:(num_loci - min_num_hetero)
-hom = rand(possible_num_homo)
-het = num_loci - hom
-hom_vec = fill("HOM", hom)
-het_vec = fill("HET", het)
-all_loci = vcat(hom_vec, het_vec)
-all_loci = sample(all_loci, num_loci, replace=false)
-chromosome1 = rand(["A1", "A2"], num_loci)
-chromosome2 = []
-for i in 1:length(all_loci)
-if all_loci[i] == "HOM"
-push!(chromosome2, chromosome1[i])
-elseif all_loci[i] == "HET"
-chromosome2[i] = (chromosome1[i] == "A1" ? "A2" : "A1")
-else
-  println("error")
-end
-end
-genotype = [chromosome1'; chromosome2']
-return genotype
-end
-
-# Function to get offspring given two parental genotypes
-function get_offspring(genotype1, genotype2)
-gamete1 = []
-for i in 1:size(genotype1, 2)
-if genotype1[1, i] == genotype1[2, i]
-push!(gamete1, genotype1[1, i])
-elseif genotype1[1, i] != genotype1[2, i]
-push!(gamete1, sample([genotype1[1, i], genotype1[2, i]], 1))
-end
-end
-
-gamete2 = []
-for i in 1:size(genotype2, 2)
-if genotype2[1, i] == genotype2[2, i]
-push!(gamete2, genotype2[1, i])
-elseif genotype2[1, i] != genotype2[2, i]
-push!(gamete2, sample([genotype2[1, i], genotype2[2, i]], 1))
-end
-end
-
-new_genotype = [gamete1'; gamete2']
-return new_genotype
-end
-
-# Function to calculate phenotype given genotype and other parameters
-function get_phenotype(geno, baseline, effect_a1, effect_a2, effect_d)
-effect_val = []
-for e in all_effect
-if e == "DOM"
-if par1[1, e] == "A1" && par2[2, e] == "A1"
-push!(effect_val, 2 * (mid_effect + effect_a1))
-elseif par1[1, e] == "A1" && par2[2, e] == "A2" || par1[1, e] == "A2" && par2[2, e] == "A1"
-push!(effect_val, mid_effect + effect_d + mid_effect + effect_d)
-elseif par1[1, e] == "A2" && par2[2, e] == "A2"
-push!(effect_val, 2 * (mid_effect + effect_a2))
-end
-elseif e == "ADD"
-if par1[1, e] == "A1" && par2[2, e] == "A1"
-push!(effect_val, 2 * (mid_effect + effect_a1))
-elseif par1[1, e] == "A1" && par2[2, e] == "A2" || par1[1, e] == "A2" && par2[2, e] == "A1"
-push!(effect_val, mid_effect + effect_a1 + mid_effect + effect_a2)
-elseif par1[1, e] == "A2" && par2[2, e] == "A2"
-push!(effect_val, 2 * (mid_effect + effect_a2))
-end
-else
-  println("error")
-end
-end
-
-if epistasis == true
-epis_val = sum(effect_val .>= 1) >= epistasis_level
-geno_val = epis_val ? sum(effect_val) + epistasis_value : sum(effect_val)
-else
-  geno_val = sum(effect_val)
-end
-
-env_val = sample(env_range, 1)
-pheno = baseline + env_effect * env_val + geno_val
-return [baseline, env_val, geno_val, pheno]
-end
 
 # Parameters
 num_simulations = 100
@@ -93,7 +10,7 @@ num_groups = 30
 number_loci = 6
 min_num_hetero = 3
 
-number_of_dom = 0
+number_of_dom = 2
 effect_A1 = +1
 effect_A2 = 0
 effect_d = 0.5
@@ -106,40 +23,138 @@ epistasis_level = 6
 epistasis_value = +10
 baseline = 10
 
+
 if env_type == "Uniform"
-env_range = [-3:-1..., 1, 3]
+  env_range = vcat(-3:-1, 1:3)
 elseif env_type == "Normal"
-env_range = round.(randn(1000) .* env_sd, digits=2)
+  env_range = round.(randn(1000) .* env_sd, digits=2)
 else
   println("error")
 end
 
+  
 possible_num_homo = 0:(number_loci - min_num_hetero)
 number_of_add = number_loci - number_of_dom
 add_vec = fill("ADD", number_of_add)
 dom_vec = fill("DOM", number_of_dom)
 all_effect = vcat(add_vec, dom_vec)
-all_effect = sample(all_effect, number_loci, replace=false)
+all_effect = reshape(shuffle(all_effect),1,:)
 mid_effect = mean([effect_A1, effect_A2])
 effect_a1 = effect_A1 - mid_effect
 effect_a2 = effect_A2 - mid_effect
 minimum_pheno_value = baseline + env_effect * minimum(env_range) + 2 * number_loci * minimum([effect_A1, effect_A2])
+  
 
+# Function to sample genotypesfunction sample_genotype(num_loci)
+function sample_genotype(num_loci)
+    possible_num_homo = 0:(num_loci - min_num_hetero)
+    hom = rand(possible_num_homo)
+    het = num_loci - hom
+    hom_vec = reshape(fill("HOM", hom),1,:)
+    het_vec = reshape(fill("HET", het),1,:)
+    all_loci = hcat(hom_vec, het_vec)
+    all_loci = shuffle(all_loci)
+    chromosome1 = reshape(rand(["A1", "A2"], num_loci), 1, :)
+    chromosome2 = reshape(Vector{String}(undef, num_loci),1,:)
+    
+    for i in 1:length(all_loci)
+      if all_loci[i] == "HOM"
+          chromosome2[i] = chromosome1[i]
+      elseif all_loci[i] == "HET"
+          chromosome2[i] = (chromosome1[i] == "A1" ? "A2" : "A1")
+      else
+          println("error")
+      end
+  end
+    
+    genotype = vcat(chromosome1, chromosome2)
+    return genotype
+end
+
+function get_phenotype(geno, baseline, effect_a1, effect_a2, effect_d)
+  effect_val = []
+  for e in 1:length(all_effect) # For every loci
+      if all_effect[e] == "DOM" # If the locus is dominant
+          if par1[1, e] == "A1" && par2[2, e] == "A1"
+              push!(effect_val, 2 * (mid_effect + effect_a1))
+          elseif (par1[1, e] == "A1" && par2[2, e] == "A2") || (par1[1, e] == "A2" && par2[2, e] == "A1")
+              push!(effect_val, mid_effect + effect_d + mid_effect + effect_d)
+          elseif par1[1, e] == "A2" && par2[2, e] == "A2"
+              push!(effect_val, 2 * (mid_effect + effect_a2))
+          else
+              println("error")
+          end
+      elseif all_effect[e] == "ADD" # If the locus is additive
+          if par1[1, e] == "A1" && par2[2, e] == "A1"
+              push!(effect_val, 2 * (mid_effect + effect_a1))
+          elseif (par1[1, e] == "A1" && par2[2, e] == "A2") || (par1[1, e] == "A2" && par2[2, e] == "A1")
+              push!(effect_val, mid_effect + effect_a1 + mid_effect + effect_a2)
+          elseif par1[1, e] == "A2" && par2[2, e] == "A2"
+              push!(effect_val, 2 * (mid_effect + effect_a2))
+          else
+              println("error")
+          end
+      else
+          println("error")
+      end
+  end
+
+  # Epistasis term
+  if epistasis == true # If epistasis is present
+      epis_val = sum(effect_val .>= 1) >= epistasis_level
+      geno_val = epis_val ? sum(effect_val) + epistasis_value : sum(effect_val)
+  else
+      # No epistasis
+      geno_val = sum(effect_val)
+  end
+
+  env_val = rand(env_range) # Sample the environmental range
+  pheno = baseline + env_effect * env_val + geno_val
+  return [baseline, env_val, geno_val, pheno]
+end
+
+# Function to get offspring given two parental genotypes
+function get_offspring(genotype1, genotype2)
+  gamete1 = []
+  for i in 1:size(genotype1, 2)
+      if genotype1[1, i] == genotype1[2, i]
+          push!(gamete1, genotype1[1, i])
+      elseif genotype1[1, i] != genotype1[2, i]
+          push!(gamete1, sample([genotype1[1, i], genotype1[2, i]], 1))
+      end
+  end
+
+  gamete2 = []
+  for i in 1:size(genotype2, 2)
+      if genotype2[1, i] == genotype2[2, i]
+          push!(gamete2, genotype2[1, i])
+      elseif genotype2[1, i] != genotype2[2, i]
+          push!(gamete2, sample([genotype2[1, i], genotype2[2, i]], 1))
+      end
+  end
+
+  new_genotype = [gamete1'; gamete2']
+  return new_genotype
+end
+
+
+
+
+# Function to calculate phenotype given genotype and other parameters
 slope_vec = []
 intercept_vec = []
 R_squared_vec = []
 plot_vec = []
 
 for simulation in 1:num_simulations
-all_data = DataFrame()
+  all_data = DataFrame()
 
-for group in 1:num_groups
-all_geno = Dict(
-  "par1" => sample_genotype(number_loci),
-  "par2" => sample_genotype(number_loci),
-  "par3" => sample_genotype(number_loci),
-  "par4" => sample_genotype(number_loci)
-)
+  for group in 1:num_groups
+  all_geno = Dict(
+    "par1" => sample_genotype(number_loci),
+    "par2" => sample_genotype(number_loci),
+    "par3" => sample_genotype(number_loci),
+    "par4" => sample_genotype(number_loci))
 
 pheno_par1 = get_phenotype(all_geno["par1"], baseline, effect_a1, effect_a2, effect_d)
 pheno_par2 = get_phenotype(all_geno["par2"], baseline, effect_a1, effect_a2, effect_d)
@@ -184,15 +199,13 @@ small_df[:type] = "small"
 
 all_data_df2 = vcat(large_df, small_df)
 
-# Your remaining code for running linear regression and generating plots...
 
-# Loop through each slope and intercept combination
 regression_lines_df = DataFrame(x=[], y=[], simulation=String[])
 for i in 1:length(slope_vec)
-x_range = extrema(df[:midpar])
-y_range = slope_vec[i] .* x_range .+ intercept_vec[i]
-line_df = DataFrame(x=x_range, y=y_range, simulation="Simulation $i")
-append!(regression_lines_df, line_df)
+  x_range = extrema(df[:midpar])
+  y_range = slope_vec[i] .* x_range .+ intercept_vec[i]
+  line_df = DataFrame(x=x_range, y=y_range, simulation="Simulation $i")
+  append!(regression_lines_df, line_df)
 end
 
 using Gadfly
