@@ -21,7 +21,7 @@ effect_d <- 0.5
 env_type <- "Uniform"
 env_sd <- 2
 env_effect <- 1 # Multiplier of the env_effect
-epistasis <- TRUE # Turn to TRUE, to activate epistasis
+epistasis <- FALSE # Turn to TRUE, to activate epistasis
 epistasis_level <- 6 # If N loci have at least 1 A1
 epistasis_value <- +10 # add X to the genotypic value
 baseline <- 10
@@ -399,5 +399,3 @@ p2 <- grid.arrange(scatter,
              hist_bottom, 
              empty,
              ncol=2, nrow=2, widths=c(4, 1), heights=c(4, 1))
-
-
