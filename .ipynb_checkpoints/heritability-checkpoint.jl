@@ -3,7 +3,8 @@ using Random
 using Statistics
 using GLM
 using RCall
-@rlibrary ggplot2
+using Images
+R"library(ggplot2)"
 
 # Parameters
 num_simulations = 500
@@ -12,7 +13,7 @@ num_groups = 30
 number_loci = 6
 min_num_hetero = 3
 
-number_of_dom = 2
+number_of_dom = 0
 effect_A1 = +1
 effect_A2 = 0
 effect_d = 0.5
@@ -247,15 +248,15 @@ end
 all_g_df = vcat(all_data...)
 
 mod1 = lm(@formula(midoff ~ midpar), all_g_df)
-intercept = round(coef(mod1)[1],digits=3)
-slope = round(coef(mod1)[2],digits=3)
-r_squared = round(r2(mod1),digits=3)
+intercept1 = round(coef(mod1)[1],digits=3)
+slope1 = round(coef(mod1)[2],digits=3)
+r_squared1 = round(r2(mod1),digits=3)
 
 push!(slope_vec, slope)
 push!(intercept_vec, intercept)
 push!(R_squared_vec, r_squared)
 
-subtitle1 = "y~" * string(slope) * "*x + " * string(intercept) * ". R^2=" * string(r_squared)
+subtitle1 = "y~" * string(slope1) * "*x + " * string(intercept1) * ". R^2=" * string(r_squared1)
 
 @rput all_g_df
 @rput subtitle1
@@ -280,12 +281,12 @@ end
 all_sim_df = vcat(all_sim...)
 
 mod2 = lm(@formula(midoff ~ midpar), all_sim_df)
-intercept = round(coef(mod2)[1],digits=3)
-slope = round(coef(mod2)[2],digits=3)
-r_squared = round(r2(mod2),digits=3)
+intercept2 = round(coef(mod2)[1],digits=3)
+slope2 = round(coef(mod2)[2],digits=3)
+r_squared2 = round(r2(mod2),digits=3)
 
 title2 = string(number_loci) * " loci, " * string(number_of_dom) * " dominant"
-subtitle2 = "y~" * string(slope) * "*x + " * string(intercept) * ". R^2=" * string(r_squared)
+subtitle2 = "y~" * string(slope2) * "*x + " * string(intercept2) * ". R^2=" * string(r_squared2)
 
 # Initialize an empty DataFrame to store regression lines
 regression_lines_df = DataFrame(x = Float64[], y = Float64[], simulation = String[])
@@ -293,10 +294,10 @@ regression_lines_df = DataFrame(x = Float64[], y = Float64[], simulation = Strin
 # Loop through each slope and intercept combination
 for i in 1:length(slope_vec)
     # Calculate the endpoints of the line using the range of x values
-    x_range = extrema(all_sim_df.midpar)
-    y_range = slope_vec[i] .* x_range .+ intercept_vec[i]
+    x_range_ln = extrema(all_sim_df.midpar)
+    y_range_ln = slope_vec[i] .* x_range_ln .+ intercept_vec[i]
 
-    xy_tuples = [(x_range[i], y_range[i]) for i in 1:2]
+    xy_tuples = [(x_range_ln[i], y_range_ln[i]) for i in 1:2]
     df = DataFrame(x = [xy[1] for xy in xy_tuples], y = [xy[2] for xy in xy_tuples])
     df.simulation .= "Simulation $i"
    
@@ -311,14 +312,17 @@ end
 @rput title2
 @rput subtitle2
 @rput minimum_pheno_value
+@rput slope2
+@rput intercept2
+@rput r_squared2
 R"""
 p2<- ggplot(all_sim_df,aes(x = midpar, y = midoff)) +
   geom_point() +
   geom_line(data = regression_lines_df,
             aes(x = x, y = y, group = simulation),
             color = "red", alpha = 0.2) +
-  geom_abline(slope=mean(slope_vec),
-            intercept=mean(intercept_vec),
+  geom_abline(slope=slope2,
+            intercept=intercept2,
             col="blue",lwd=1.5)+
   xlab("Midparent diameter (cm)")+
   ylab("Midoffspring diameter (cm)")+
@@ -330,6 +334,9 @@ p2<- ggplot(all_sim_df,aes(x = midpar, y = midoff)) +
   geom_vline(aes(xintercept=minimum_pheno_value,col="red"))+
   geom_hline(aes(yintercept=minimum_pheno_value,col="red"))+
   theme(legend.position="none")
+
+ggsave(p2,file="heritability_simulations/p2.png",dpi=600)
+
 """
 
 p2 = R"p2"
@@ -370,6 +377,9 @@ hist_right,
 hist_bottom, 
 empty,
 ncol=2, nrow=2, widths=c(4, 1), heights=c(4, 1))
+
+ggsave(p3,file="heritability_simulations/p3.png",dpi=600)
+
 """
 
-my_plot = R"p3"
+R"plot(p3)"
