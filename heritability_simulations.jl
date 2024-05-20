@@ -1,7 +1,9 @@
 ### A Pluto.jl notebook ###
 # v0.19.41
 
-#> [frontmatter]
+#> [[frontmatter.author]]
+#> name = "Alejandro Gil Gomez"
+#> url = "https://alexgilgomez.netlify.app/"
 
 using Markdown
 using InteractiveUtils
@@ -34,7 +36,7 @@ md"# Heritability simulations:"
 
 # ╔═╡ a151fae9-0618-42c9-8913-9819091a4eed
 md"""
-This repository contains R/julia scripts that performs simulations of genetic and environmental effects on phenotypic traits. 
+This repository contains a julia script that performs simulations of genetic and environmental effects on phenotypic traits. 
 
 The main features of the script include:
 
@@ -42,28 +44,17 @@ Simulation of genetic variation: The script simulates parental genotypes for a s
 
 ## How to use it?
 0. Download this GitHub repository.
-1. Install julia and Pluto.jl. The script also requires an installation of R with the package ggplot2 and gridExtra for visualizing the results.
+1. Install julia and Pluto.jl.
 2. Select the parameters using the sliders below
 3. Visualize the scatterplots, the heritability is the slope of the graph
 """
 
 
-# ╔═╡ 0d7b91fd-4a08-4ee7-8f22-58da7fec45ff
-
-R"""
-library(ggplot2)
-library(gridExtra)
-getwd()
-#setwd("heritability_simulations")
-"""
-
-# ╔═╡ 18b6524e-ede4-493c-9db9-d3e2bd6ceca8
-md"""
-Each simulation is an activity for the class Ecological Genetics in Stony Brook University.
-"""
-
-# ╔═╡ 180e1ebd-e697-4a47-b91a-372c50a4dc6e
-@bind num_simulations Slider(1:500,500,true)
+# ╔═╡ eda96df6-63b5-41ed-a772-113de76039e5
+begin
+	@rimport ggplot2 as ggplot2
+	@rimport gridExtra as gridExtra
+end
 
 # ╔═╡ 94e80ea7-b250-4ba1-813c-f1e38eb1d5fb
 md"""
@@ -81,11 +72,42 @@ Finally, the class collaboratively conducts a regression analysis on the midpare
 In the second activity, students replicate the process but adhere to complete dominance rules, where (1,0)=(1,1)=2cm and (0,0)=0cm per loci.
 """
 
+# ╔═╡ 18b6524e-ede4-493c-9db9-d3e2bd6ceca8
+md"""
+Each simulation represents a semester for the class Ecological Genetics in Stony Brook University.
+"""
+
+# ╔═╡ 180e1ebd-e697-4a47-b91a-372c50a4dc6e
+@bind num_simulations Slider(1:500,50,true)
+
+# ╔═╡ 02530311-85f9-431b-b756-db1f7a97e27a
+md"""
+Each group has 4 students (4 pumpkins each), the typical number of groups is 30.
+"""
+
 # ╔═╡ 1f50ef93-1e61-410d-98bf-ffe9e0d31379
 @bind num_groups Slider(1:30,30,true)
 
+# ╔═╡ 7a6fd8cc-7862-4a04-a080-13f86a7597e2
+md"""
+The baseline diameter for a pumpkin is 10 cm.
+"""
+
+# ╔═╡ ad29a57d-0863-42ab-9591-b94dfdc2c11f
+@bind baseline Slider(-20:20,10,true)
+
+# ╔═╡ 1d354d7b-c6bc-47c6-8610-ea9bbe5e94d2
+md"""
+We can simulate n number of loci:
+"""
+
 # ╔═╡ c7ec5f83-86a3-46c5-bb81-55f0de58d6c4
 @bind number_loci Slider(0:15,6,true)
+
+# ╔═╡ 414bd2ae-045c-49e7-9762-30a7ce7255d9
+md"""
+With a minimum number of loci being heterozygotes.
+"""
 
 # ╔═╡ 4a4b5c6e-c711-4942-a46d-ca84dbe87ded
 @bind min_num_hetero Slider(0:15,3,true)
@@ -111,20 +133,12 @@ The effect of A1 is +1cm. An A1A1 individual would have +2cm.
 
 # ╔═╡ 56acd7af-5c63-455b-a13e-1b6bd2aef691
 md"""
-The effect of dominance can be toggle to simulate partial dominance, total dominance, underdominance and overdominance. d is the effect over the mid-effect value, mean(A1,A2)
+The effect of dominance can be toggled to simulate partial dominance, total dominance, underdominance and overdominance. d is the effect over the mid-effect value, mean(A1,A2)
 d=0 (additivity), d=1 (total dominance)
 """
 
 # ╔═╡ 0ced1f0e-b30a-47a2-87e3-dfea1f2f41b7
 @bind effect_d Slider(-2:2,0,true)
-
-# ╔═╡ 7a6fd8cc-7862-4a04-a080-13f86a7597e2
-md"""
-The baseline is 10cm.
-"""
-
-# ╔═╡ ad29a57d-0863-42ab-9591-b94dfdc2c11f
-@bind baseline Slider(-20:20,10,true)
 
 # ╔═╡ c62ce886-b1df-4a56-8c20-daf52e111fc0
 md"""
@@ -165,7 +179,7 @@ Epistasis can also be modeled by adding a value if a minimum of loci (epistasis_
 # ╔═╡ f4a78598-79db-48c6-9205-87a9ca36e2e8
 @bind epistasis_value Slider(-10.0:10.0,10.0,true)
 
-# ╔═╡ ca17099c-b2ad-4f64-844f-a839fc83c681
+# ╔═╡ e04c5782-5cf6-42d9-9c53-321744c200c5
 begin
 	mid_effect = mean([effect_A1, effect_A2])
 	effect_a1 = effect_A1 - mid_effect
@@ -185,10 +199,6 @@ begin
 		end
 		
 		minimum_pheno_value = baseline + env_effect * minimum(env_range) + 2 * number_loci * minimum([effect_A1, effect_A2])
-end
-
-# ╔═╡ 24c34c87-953f-404d-ba73-a40e4715187d
-begin
 	
 	# Define functions:
 	# Function to sample genotypesfunction sample_genotype(num_loci)
@@ -217,7 +227,7 @@ begin
 	    return genotype
 	end
 	
-	function get_phenotype(geno, baseline, effect_a1, effect_a2, effect_d,effects)
+function get_phenotype(geno, baseline, effect_a1, effect_a2, effect_d,effects)
 	effect_val = []
 	    for e in 1:length(effects) # For every loci
 	        if effects[e] == "DOM" # If the locus is dominant
@@ -258,8 +268,8 @@ begin
 	    pheno = baseline + env_effect * env_val + geno_val
 	    return [baseline env_val geno_val pheno]
 	end
-	
-	# Function to get offspring given two parental genotypes
+
+		# Function to get offspring given two parental genotypes
 	function get_offspring(genotype1, genotype2)
 	    gamete1 = []
 	    for i in 1:size(genotype1, 2)
@@ -285,11 +295,7 @@ begin
 	    new_genotype = vcat(gamete1, gamete2)
 	    return new_genotype
 	end
-	
-end
 
-# ╔═╡ 48d477ec-6fd9-4106-9e48-11bad60a631b
-begin
 	slope_vec = Vector{Float64}()
 	intercept_vec = Vector{Float64}()
 	R_squared_vec =Vector{Float64}()
@@ -408,29 +414,11 @@ begin
 	
 	subtitle1 = "y~" * string(slope1) * "*x + " * string(intercept1) * ". R^2=" * string(r_squared1)
 	
-	@rput all_g_df
-	@rput subtitle1
-	R"""
-	p1_s <- ggplot(all_g_df,aes(x=midpar,y=midoff))+
-	  theme_minimal()+
-	  geom_point()+
-	  geom_abline()+
-	  ggtitle(subtitle1)
-	"""
-	
-	p1_s =R"p1_s"
-	
-	push!(p1, p1_s)
-	
 	# Store list of dataframes:
 	push!(all_sim, all_g_df)
 	
 	end
-end
 
-# ╔═╡ 07285fd1-14be-4749-97e3-a05db881f08d
-begin
-	
 	# Combine all data into single df:
 	all_sim_df = vcat(all_sim...)
 	
@@ -439,8 +427,9 @@ begin
 	slope2 = round(coef(mod2)[2],digits=3)
 	r_squared2 = round(r2(mod2),digits=3)
 	
-	title2 = string(number_loci) * " loci, " * string(number_of_dom) * " dominant"
-	subtitle2 = "y~" * string(slope2) * "*x + " * string(intercept2) * ". R^2=" * string(r_squared2)
+	title2 = string(number_loci) * " loci, " * string(number_of_dom) * " dominant.\n" * "Effect_A1=" * string(effect_A1) * " Effect_A2=" * string(effect_A2) * " Effect_D=" * string(effect_d) * "\n" * "Epistasis: " * string(epistasis) * ". Epistasis_effect: " * string(epistasis_value) * " for " * string(epistasis_level) * " loci.\n" * "Env_type: " * env_type * ". Env_multiplier: " * string(env_effect)
+	
+	subtitle2 = "Equation: midoffspring diameter(cm)~" * string(slope2) * "*midparent diameter(cm) + " * string(intercept2) * ". R^2=" * string(r_squared2)
 	
 	# Initialize an empty DataFrame to store regression lines
 	regression_lines_df = DataFrame(x = Float64[], y = Float64[], simulation = String[])
@@ -458,90 +447,46 @@ begin
 	    # Add this line to the DataFrame storing all regression lines
 	    append!(regression_lines_df, df)
 	end
-end
 
-# ╔═╡ 9d3c564e-6769-4aa9-b05d-ab8c20aaad54
-begin
+	"Heritability less than 0=" * string(sum(slope_vec.<=0)/length(slope_vec))
 	
-	# Plot the original points and regression lines
-	@rput all_sim_df
-	@rput regression_lines_df
-	@rput title2
-	@rput subtitle2
-	@rput minimum_pheno_value
-	@rput slope2
-	@rput intercept2
-	@rput r_squared2
-	R"""
-	p2<- ggplot(all_sim_df,aes(x = midpar, y = midoff)) +
-	  geom_point() +
-	  geom_line(data = regression_lines_df,
-	            aes(x = x, y = y, group = simulation),
-	            color = "red", alpha = 0.2) +
-	  geom_abline(slope=slope2,
+	"Heritability less than 0.45=" * string(sum(slope_vec .<= 0.45)/length(slope_vec))
+	
+	"Average Heritability" * string(mean(slope_vec))
+	
+	df2= DataFrame(slope=slope_vec,intercept=intercept_vec)
+	
+p2=ggplot2.ggplot(all_sim_df, ggplot2.aes(x=:midpar, y=:midoff)) +  		   ggplot2.geom_point()+  ggplot2.geom_line(data = regression_lines_df,
+	            ggplot2.aes(x = :x, y = :y, group = :simulation),
+	            color = "red", alpha = 0.2)+
+	ggplot2.geom_abline(slope=slope2,
 	            intercept=intercept2,
 	            col="blue",lwd=1.5)+
-	  xlab("Midparent diameter (cm)")+
-	  ylab("Midoffspring diameter (cm)")+
-	  theme_minimal() +
-	  labs(title=title2,
+	  ggplot2.xlab("Midparent diameter (cm)")+
+	  ggplot2.ylab("Midoffspring diameter (cm)")+
+	  ggplot2.theme_minimal() +
+	  ggplot2.labs(title=title2,
 	          subtitle=subtitle2)+
-	  geom_vline(aes(xintercept=10))+
-	  geom_hline(aes(yintercept=10))+
-	  geom_vline(aes(xintercept=minimum_pheno_value,col="red"))+
-	  geom_hline(aes(yintercept=minimum_pheno_value,col="red"))+
-	  theme(legend.position="none")
+	ggplot2.geom_vline(ggplot2.aes(xintercept=10))+
+	  ggplot2.geom_hline(ggplot2.aes(yintercept=10))+
+	  ggplot2.geom_vline(ggplot2.aes(xintercept=minimum_pheno_value,col="red"))+
+	  ggplot2.geom_hline(ggplot2.aes(yintercept=minimum_pheno_value,col="red"))
 	
-	ggsave(p2,file="p2.png",dpi=600)
-	"""
-end
-
-# ╔═╡ 2124d295-d64e-41af-bb58-6e87b76035e5
-begin
+	scatter=ggplot2.ggplot(df2,ggplot2.aes(x=:slope,y=:intercept))+
+	  ggplot2.theme_minimal()+
+	  ggplot2.geom_hex()
 	
+	hist_bottom = ggplot2.ggplot()+
+		ggplot2.geom_histogram(data=df2,ggplot2.aes(:slope))+
+		ggplot2.theme_minimal()
 	
-	  "Heritability less than 0=" * string(sum(slope_vec.<=0)/length(slope_vec))
-	  "Heritability less than 0.45=" * string(sum(slope_vec .<= 0.45) / length(slope_vec))
-	  "Average Heritability" * string(mean(slope_vec))
+	hist_right = ggplot2.ggplot()+
+		ggplot2.geom_histogram(data=df2,ggplot2.aes(:intercept))+
+		ggplot2.coord_flip()+
+		ggplot2.theme_minimal()
 	
-	  df2= DataFrame(slope=slope_vec,intercept=intercept_vec)
-	
-	@rput df2
-	
-	R"""
-	scatter <- ggplot(df2,aes(x=slope,y=intercept))+
-	  theme_minimal()+
-	  geom_hex()
-	
-	hist_bottom = ggplot()+
-	geom_histogram(data=df2,aes(slope))+
-	theme_minimal()
-	hist_right = ggplot()+
-	geom_histogram(data=df2,aes(intercept))+
-	coord_flip()+
-	theme_minimal()
-	
-	empty <- ggplot() +
-	  geom_point(aes(1, 1), colour="white") +
-	  theme(axis.ticks = element_blank(),
-	        panel.background = element_blank(),
-	        axis.text.x = element_blank(),
-	        axis.text.y = element_blank(),
-	        axis.title.x = element_blank(),
-	        axis.title.y = element_blank())
-	        
-	p3 <- grid.arrange(scatter, 
-	hist_right,
-	hist_bottom, 
-	empty,
-	ncol=2, nrow=2, widths=c(4, 1), heights=c(4, 1))
-	
-	ggsave(p3,file="p3.png",dpi=600)
-	
-	p4 <- grid.arrange(p2,p3,ncol=2, nrow=1,widths=c(6, 8),heights=4)
-	ggsave(p4,file="p4.png",dpi=600)
-	"""
-	
+	p3 = gridExtra.grid_arrange(scatter,hist_right,hist_bottom,
+	ncol=2, nrow=2, widths=(4, 1), heights=(4, 1))
 end
 
 # ╔═╡ 45d67aee-8371-4a9d-8ebf-e2e2627465a6
@@ -550,16 +495,22 @@ The slope is the heritability for all simulations (blue line).
 Each red line represent and individual simulation.
 """
 
-# ╔═╡ 9ae22876-98b0-48c1-ad91-cd709c266744
-img2 = load("p2.png")
+# ╔═╡ fca00ebc-56eb-4312-9bac-7b0448e23fa0
+begin
+	    ggplot2.ggsave(p2,file="p2.png",dpi=1000,height=7,width=7)
+	    im1 = Images.load("p2.png")
+end
 
 # ╔═╡ fff4c14e-57a9-4489-ad04-34a4d97de62f
 md"""
 This plot shows the slopes and intercepts of all simulations.
 """
 
-# ╔═╡ 3bf093c1-c522-4279-b07b-675b3b6ef6df
-img3 = load("p3.png")
+# ╔═╡ de7c86f4-7744-4188-9201-32e533dff2b2
+begin
+		ggplot2.ggsave(p3,file="p3.png",dpi=600)	
+		im2 = Images.load("p3.png")
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1983,42 +1934,40 @@ version = "17.4.0+2"
 # ╔═╡ Cell order:
 # ╟─4927a110-5f86-4ee3-a325-b5f7c922f607
 # ╟─a151fae9-0618-42c9-8913-9819091a4eed
-# ╟─f7e17c60-08b4-11ef-2aba-91533f163dab
-# ╟─0d7b91fd-4a08-4ee7-8f22-58da7fec45ff
+# ╠═f7e17c60-08b4-11ef-2aba-91533f163dab
+# ╠═eda96df6-63b5-41ed-a772-113de76039e5
+# ╟─94e80ea7-b250-4ba1-813c-f1e38eb1d5fb
 # ╟─18b6524e-ede4-493c-9db9-d3e2bd6ceca8
 # ╠═180e1ebd-e697-4a47-b91a-372c50a4dc6e
-# ╟─94e80ea7-b250-4ba1-813c-f1e38eb1d5fb
+# ╟─02530311-85f9-431b-b756-db1f7a97e27a
 # ╠═1f50ef93-1e61-410d-98bf-ffe9e0d31379
+# ╟─7a6fd8cc-7862-4a04-a080-13f86a7597e2
+# ╠═ad29a57d-0863-42ab-9591-b94dfdc2c11f
+# ╠═1d354d7b-c6bc-47c6-8610-ea9bbe5e94d2
 # ╠═c7ec5f83-86a3-46c5-bb81-55f0de58d6c4
+# ╟─414bd2ae-045c-49e7-9762-30a7ce7255d9
 # ╠═4a4b5c6e-c711-4942-a46d-ca84dbe87ded
 # ╟─24559a8f-b57d-4af8-ae2b-206f75fb065f
 # ╠═29130392-6d35-43f1-980f-76ca1d94c9bf
 # ╟─77b8caca-2ca2-4b4e-b509-415bce94ff3e
 # ╠═b9f9b293-18de-457d-b8bc-cce161d0d654
 # ╠═cc714e73-d5e5-4ad4-a1fe-317cb56eeec2
-# ╠═56acd7af-5c63-455b-a13e-1b6bd2aef691
+# ╟─56acd7af-5c63-455b-a13e-1b6bd2aef691
 # ╠═0ced1f0e-b30a-47a2-87e3-dfea1f2f41b7
-# ╠═7a6fd8cc-7862-4a04-a080-13f86a7597e2
-# ╠═ad29a57d-0863-42ab-9591-b94dfdc2c11f
 # ╟─c62ce886-b1df-4a56-8c20-daf52e111fc0
 # ╠═abf93be6-0530-4484-b8fa-83bbb13d5427
 # ╟─286859c5-8276-4954-a29f-31d4c8272bb3
 # ╠═4c188ca0-8442-4b29-8584-27ea452f944d
-# ╠═eede399b-57dc-469e-ac7c-1be27c33dadf
+# ╟─eede399b-57dc-469e-ac7c-1be27c33dadf
 # ╠═cf8b4d1e-678e-4695-bd1f-92fb3947ecdc
-# ╠═951a3bca-57e0-42dd-8a5f-4b44fc9e2902
+# ╟─951a3bca-57e0-42dd-8a5f-4b44fc9e2902
 # ╠═28e5b10f-5450-4541-8799-a480eddf8ca3
 # ╠═5ff29627-1d4c-49c1-894a-5bb3bd185c35
 # ╠═f4a78598-79db-48c6-9205-87a9ca36e2e8
-# ╟─ca17099c-b2ad-4f64-844f-a839fc83c681
-# ╟─24c34c87-953f-404d-ba73-a40e4715187d
-# ╟─48d477ec-6fd9-4106-9e48-11bad60a631b
-# ╟─07285fd1-14be-4749-97e3-a05db881f08d
-# ╟─9d3c564e-6769-4aa9-b05d-ab8c20aaad54
-# ╠═2124d295-d64e-41af-bb58-6e87b76035e5
+# ╠═e04c5782-5cf6-42d9-9c53-321744c200c5
 # ╟─45d67aee-8371-4a9d-8ebf-e2e2627465a6
-# ╠═9ae22876-98b0-48c1-ad91-cd709c266744
+# ╠═fca00ebc-56eb-4312-9bac-7b0448e23fa0
 # ╟─fff4c14e-57a9-4489-ad04-34a4d97de62f
-# ╠═3bf093c1-c522-4279-b07b-675b3b6ef6df
+# ╠═de7c86f4-7744-4188-9201-32e533dff2b2
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
