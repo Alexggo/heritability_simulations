@@ -20,13 +20,13 @@ end
 
 # ╔═╡ f7e17c60-08b4-11ef-2aba-91533f163dab
 begin
+	using RCall
 	using Markdown
 	using InteractiveUtils
 	using DataFrames
 	using Random
 	using Statistics
 	using GLM
-	using RCall
 	using PlutoUI
 	using Images
 end
@@ -43,12 +43,21 @@ The main features of the script include:
 Simulation of genetic variation: The script simulates parental genotypes for a specified number of loci, considering both additive and dominant effects. It then generates offspring genotypes based on parental genotypes and calculates resulting phenotypic values. Environmental variation: Environmental effects on phenotypic traits are simulated by specifying a range of environmental values. Phenotypic values are calculated by incorporating both genetic and environmental effects. Regression analysis: Linear regression models are fitted to the simulated data to explore the relationship between parental and offspring phenotypic values. The script calculates regression coefficients, intercepts, and R-squared values to quantify the strength of the relationship. Visualization: The script generates visualizations, including scatter plots of parental-offspring phenotypic values, histograms of regression coefficients and intercepts, and a combined plot displaying regression lines for multiple simulations. The script provides insights into the interaction between genetic and environmental factors in determining phenotypic variation, making it useful for educational purposes and research in quantitative genetics.
 
 ## How to use it?
-0. Download this GitHub repository.
-1. Install julia and Pluto.jl.
-2. Select the parameters using the sliders below
-3. Visualize the scatterplots, the heritability is the slope of the graph
+1. Select the parameters using the sliders below
+2. Visualize the scatterplots, the heritability is the slope of the graph
 """
 
+# ╔═╡ 9224bb52-38e9-4bd8-8756-406440c613b8
+R"""
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+
+# Check if gridExtra is installed, and if not, install it
+if (!requireNamespace("gridExtra", quietly = TRUE)) {
+  install.packages("gridExtra")
+}
+"""
 
 # ╔═╡ eda96df6-63b5-41ed-a772-113de76039e5
 begin
@@ -78,7 +87,7 @@ Each simulation represents a semester for the class Ecological Genetics in Stony
 """
 
 # ╔═╡ 180e1ebd-e697-4a47-b91a-372c50a4dc6e
-@bind num_simulations Slider(1:500,50,true)
+@bind num_simulations Slider(1:500,200,true)
 
 # ╔═╡ 02530311-85f9-431b-b756-db1f7a97e27a
 md"""
@@ -154,7 +163,7 @@ env_effect is a multiplier of the environmental range.
 """
 
 # ╔═╡ 4c188ca0-8442-4b29-8584-27ea452f944d
-@bind env_effect Slider(-3:3,1,true)
+@bind env_effect Slider(0:3,1,true)
 
 # ╔═╡ eede399b-57dc-469e-ac7c-1be27c33dadf
 md"""
@@ -162,7 +171,7 @@ env_sd is a parameter to model the normal distribution variance.
 """
 
 # ╔═╡ cf8b4d1e-678e-4695-bd1f-92fb3947ecdc
-@bind env_sd Slider(-3.0:3.0,2.0,true)
+@bind env_sd Slider(0:3,2,true)
 
 # ╔═╡ 951a3bca-57e0-42dd-8a5f-4b44fc9e2902
 md"""
@@ -1935,6 +1944,7 @@ version = "17.4.0+2"
 # ╟─4927a110-5f86-4ee3-a325-b5f7c922f607
 # ╟─a151fae9-0618-42c9-8913-9819091a4eed
 # ╠═f7e17c60-08b4-11ef-2aba-91533f163dab
+# ╠═9224bb52-38e9-4bd8-8756-406440c613b8
 # ╠═eda96df6-63b5-41ed-a772-113de76039e5
 # ╟─94e80ea7-b250-4ba1-813c-f1e38eb1d5fb
 # ╟─18b6524e-ede4-493c-9db9-d3e2bd6ceca8
@@ -1943,7 +1953,7 @@ version = "17.4.0+2"
 # ╠═1f50ef93-1e61-410d-98bf-ffe9e0d31379
 # ╟─7a6fd8cc-7862-4a04-a080-13f86a7597e2
 # ╠═ad29a57d-0863-42ab-9591-b94dfdc2c11f
-# ╠═1d354d7b-c6bc-47c6-8610-ea9bbe5e94d2
+# ╟─1d354d7b-c6bc-47c6-8610-ea9bbe5e94d2
 # ╠═c7ec5f83-86a3-46c5-bb81-55f0de58d6c4
 # ╟─414bd2ae-045c-49e7-9762-30a7ce7255d9
 # ╠═4a4b5c6e-c711-4942-a46d-ca84dbe87ded
@@ -1964,7 +1974,7 @@ version = "17.4.0+2"
 # ╠═28e5b10f-5450-4541-8799-a480eddf8ca3
 # ╠═5ff29627-1d4c-49c1-894a-5bb3bd185c35
 # ╠═f4a78598-79db-48c6-9205-87a9ca36e2e8
-# ╠═e04c5782-5cf6-42d9-9c53-321744c200c5
+# ╟─e04c5782-5cf6-42d9-9c53-321744c200c5
 # ╟─45d67aee-8371-4a9d-8ebf-e2e2627465a6
 # ╠═fca00ebc-56eb-4312-9bac-7b0448e23fa0
 # ╟─fff4c14e-57a9-4489-ad04-34a4d97de62f

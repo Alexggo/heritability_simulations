@@ -9,21 +9,31 @@ Regression analysis: Linear regression models are fitted to the simulated data t
 Visualization: The script generates visualizations, including scatter plots of parental-offspring phenotypic values, histograms of regression coefficients and intercepts, and a combined plot displaying regression lines for multiple simulations.
 The script provides insights into the interaction between genetic and environmental factors in determining phenotypic variation, making it useful for educational purposes and research in quantitative genetics. And includes a model for epistasis and different environmental ranges.
 
-# How can I run this?
+# Prerequirements:
 
-1. Download the html file to your computer.
-2. Run in binder or locally. I recommend to run the script locally in your computer.
-3. Download the html file and open it in a browser.
-4. Install [julia](https://julialang.org/downloads/) in your computer
-5. Open the julia terminal and install Pluto:
+This script requires two programs to be installed in your computer. Install these two programs first.
+    - [R](https://www.r-project.org/)
+    - [julia](https://julialang.org/downloads/)
+
+# How can I run this?
+1. Download the entire repository to your computer from GitHub.
+2. Open your terminal and navigate to the repository that you downloaded.
+3. Open the julia terminal and install [Rcall](https://juliainterop.github.io/RCall.jl/stable/installation/) and Pluto by typing the following to your terminal:
 ```julia
 using Pkg
+
+# You have to specify the directory where your R is located in your computer:
+# You can figure this out by typing R.home() within the program R.
+# In my case, R is installed in "C:/PROGRA~1/R/R-44~1.0"
+ENV["R_HOME"] = "....directory of R home...."
+
+Pkg.build("RCall")
 Pkg.add("Pluto")
 using Pluto
 Pluto.run()
 ```
-5. This code should open pluto in your browser.
-6. Select the heritability notebook heritability_simulations.jl from the list.
-7.  Toggle the different parameters to compute the heritability and generate plots.
+This code should open pluto in your browser.
+3. Select the heritability notebook heritability_simulations.jl from the list.
+4.  Toggle the different parameters to compute the heritability and generate plots.
 
 For more details and usage instructions, please refer to the pdf, HTML or the script itself heritability1.jl (for julia/pluto).
