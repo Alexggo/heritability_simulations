@@ -12,8 +12,10 @@ The script provides insights into the interaction between genetic and environmen
 # Prerequirements:
 
 This script requires two programs to be installed in your computer. Install these two programs first.
-    - [R](https://www.r-project.org/)
-    - [julia](https://julialang.org/downloads/)
+
+* [R](https://www.r-project.org/)
+
+* [julia](https://julialang.org/downloads/)
 
 # How can I run this?
 1. Download the entire repository to your computer from GitHub.
