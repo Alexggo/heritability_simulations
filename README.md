@@ -17,12 +17,13 @@ The script provides insights into the interaction between genetic and environmen
 4. Install [julia](https://julialang.org/downloads/) in your computer
 5. Open the julia terminal and install Pluto:
 ```julia
- Pkg.add('Pluto')
+using Pkg
+Pkg.add("Pluto")
 using Pluto
 Pluto.run()
 ```
 5. This code should open pluto in your browser.
-6. Select the heritability notebook heritability1.jl from the list.
+6. Select the heritability notebook heritability_simulations.jl from the list.
 7.  Toggle the different parameters to compute the heritability and generate plots.
 
 For more details and usage instructions, please refer to the pdf, HTML or the script itself heritability1.jl (for julia/pluto).
